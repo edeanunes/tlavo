@@ -1,0 +1,24 @@
+{
+  "name": "TLAVO — Receita Federal",
+  "short_name": "TLAVO",
+  "description": "Termo de Retencao e Lacracao de Volumes — Alfandega Foz do Iguacu",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#2c3e50",
+  "theme_color": "#2c3e50",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

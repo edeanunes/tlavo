@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TLAVO">
+<meta name="theme-color" content="#2c3e50">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>TLAVO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f2f5;font-size:14px}
+.hdr{background:#2c3e50;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:100}
+.hdr h1{font-size:15px}
+/* LOGIN */
+#tLogin{max-width:400px;margin:40px auto;background:#fff;border-radius:10px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+#tLogin h2{color:#2c3e50;font-size:17px;margin-bottom:6px}
+#tLogin p{color:#666;font-size:13px;margin-bottom:18px}
+.lc{margin-bottom:12px}
+.lc label{display:block;font-weight:bold;font-size:12px;margin-bottom:3px;color:#444;text-transform:uppercase}
+.lc input{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:16px;text-transform:uppercase}
+#statusLogin{border-radius:6px;padding:8px 12px;font-size:13px;margin-bottom:12px;display:none}
+.sl-ok{background:#d5f5e3;color:#1e8449;border:1px solid #a9dfbf}
+.sl-err{background:#fde8e8;color:#a93226;border:1px solid #f5c6cb}
+#btnEntrar{width:100%;padding:12px;background:#2980b9;color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:bold;cursor:pointer}
+/* FORM */
+#tForm{display:none}
+.siInfo{background:#eaf4fb;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#1a5276;border-bottom:1px solid #d6eaf8}
+.btnSair{background:none;border:none;color:#2980b9;cursor:pointer;font-size:13px;text-decoration:underline}
+.fc{max-width:700px;margin:12px auto;background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+h3{font-size:11px;background:#2c3e50;color:#fff;padding:4px 8px;border-radius:3px;margin:14px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+label{display:block;font-size:11px;font-weight:bold;color:#555;margin-bottom:3px;text-transform:uppercase}
+input,textarea,select{width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:4px;font-size:14px;margin-bottom:8px;text-transform:uppercase;-webkit-appearance:none}
+input[type=date],input[type=time]{text-transform:none}
+input[readonly]{background:#f5f5f5;color:#666}
+.fr{display:flex;gap:10px}
+.fr>div{flex:1;min-width:0}
+.req{border-left:3px solid #e74c3c!important}
+.btnR{background:#f39c12;color:#fff;border:none;border-radius:4px;padding:6px 10px;font-size:11px;font-weight:bold;cursor:pointer;white-space:nowrap;margin-bottom:8px}
+.toggle{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8f9fa;border-radius:6px;border:1px solid #ddd;margin:8px 0}
+.toggle input[type=checkbox]{width:18px;height:18px;margin:0}
+.toggle label{margin:0;font-size:13px;font-weight:bold;cursor:pointer}
+.extra{display:none;background:#eaf4fb;border:1px solid #bee3f8;border-radius:6px;padding:10px;margin-bottom:8px}
+.extra.vis{display:block}
+.actions{display:flex;gap:8px;margin-top:16px}
+.actions button{flex:1;padding:12px;border:none;border-radius:6px;font-weight:bold;font-size:14px;cursor:pointer}
+#btnEnviar{background:#27ae60;color:#fff}
+#btnNovo{background:#95a5a6;color:#fff}
+#btnEnviar:disabled{background:#aaa}
+#sb{position:fixed;bottom:0;left:0;right:0;padding:10px 16px;font-size:13px;font-weight:bold;text-align:center;display:none;z-index:200}
+.ok{background:#d5f5e3;color:#1e8449}
+.err{background:#fde8e8;color:#a93226}
+.enc{background:#d6eaf8;color:#1a5276}
+@media(max-width:600px){.fr{flex-direction:column;gap:0}.fc{margin:8px;padding:12px}#tLogin{margin:16px;padding:20px}}
+</style>
+</head>
+<body>
+<div class="hdr"><h1>&#128196; TLAVO — TERMO DE LACRACAO</h1></div>
+
+<div id="tLogin">
+  <h2>Identificacao</h2>
+  <p>Digite seu CPF e senha para acessar.</p>
+  <div class="lc"><label>CPF</label>
+    <input type="text" id="lCpf" inputmode="numeric" placeholder="000.000.000-00" autocomplete="off" oninput="mascCpf(this)">
+  </div>
+  <div class="lc"><label>SENHA</label>
+    <input type="password" id="lSenha" placeholder="Digite sua senha" autocomplete="off">
+  </div>
+  <div id="statusLogin"></div>
+  <button id="btnEntrar" onclick="entrar()">ENTRAR</button>
+  <p id="loginErro" style="color:#c0392b;font-size:12px;margin-top:8px"></p>
+</div>
+
+<div id="tTrocaSenha" style="display:none;max-width:400px;margin:40px auto;background:#fff;border-radius:10px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.1);font-family:Arial,sans-serif">
+  <h2 style="color:#e67e22;font-size:17px;margin-bottom:6px">🔑 Troque sua senha</h2>
+  <p style="color:#666;font-size:13px;margin-bottom:18px">Esta é sua primeira vez acessando. Crie uma nova senha de 6 dígitos numéricos.</p>
+  <div class="lc"><label>NOVA SENHA (6 dígitos)</label>
+    <input type="password" id="novaSenha" inputmode="numeric" maxlength="6" placeholder="______" autocomplete="new-password">
+  </div>
+  <div class="lc"><label>CONFIRMAR SENHA</label>
+    <input type="password" id="confirmarSenha" inputmode="numeric" maxlength="6" placeholder="______" autocomplete="new-password">
+  </div>
+  <p id="trocaErro" style="color:#c0392b;font-size:12px;margin-bottom:8px;display:none"></p>
+  <button id="btnTrocaSenha" onclick="trocarSenha()" style="width:100%;padding:12px;background:#e67e22;color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:bold;cursor:pointer">SALVAR NOVA SENHA</button>
+</div>
+<div id="tForm" style="display:none">
+  <div class="siInfo">
+    <div><strong id="siNome"></strong> &nbsp;|&nbsp; <span id="siSub"></span></div>
+    <button class="btnSair" onclick="sair()">&#8592; SAIR</button>
+  </div>
+  <div class="fc">
+  <form id="fForm" onsubmit="enviar(event)" novalidate>
+
+    <h3>DADOS DO TERMO</h3>
+    <div class="fr">
+      <div><label>LOCAL *</label>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="local" class="req" style="margin:0;flex:1">
+          <button type="button" class="btnR" onclick="reu('local')">🔄</button>
+        </div>
+      </div>
+      <div style="flex:0 0 110px"><label>DATA *</label>
+        <input type="text" id="data" class="req" placeholder="DD/MM/AAAA" maxlength="10" oninput="mascData(this)" style="text-transform:none">
+      </div>
+      <div style="flex:0 0 80px"><label>HORA *</label>
+        <input type="text" id="hora" class="req" placeholder="HH:MM" maxlength="5" oninput="mascHora(this)" style="text-transform:none">
+      </div>
+    </div>
+
+    <h3>INTERESSADO</h3>
+    <label>NOME *</label><input type="text" id="intNome" class="req">
+    <div class="fr">
+      <div><label>RG / CPF / CNPJ</label><input type="text" id="intDoc"></div>
+      <div><label>NOME DA MAE</label><input type="text" id="intMae"></div>
+      <div><label>NASCIMENTO</label><input type="text" id="intNasc" placeholder="DD/MM/AAAA" maxlength="10" oninput="mascData(this)" style="text-transform:none"></div>
+    </div>
+    <div class="fr">
+      <div style="flex:3"><label>ENDERECO</label><input type="text" id="intEnd"></div>
+      <div style="flex:1"><label>NUMERO</label><input type="text" id="intNum"></div>
+    </div>
+    <div class="fr">
+      <div><label>CEP</label><input type="text" id="intCep" style="text-transform:none"></div>
+      <div><label>BAIRRO</label><input type="text" id="intBairro"></div>
+      <div style="flex:2"><label>MUNICIPIO</label><input type="text" id="intMun"></div>
+      <div style="flex:0 0 60px"><label>UF</label>
+        <select id="intUf">
+          <option value="">--</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+          <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+          <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+          <option>PR</option><option>PE</option><option>PI</option><option>RJ</option>
+          <option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option>SP</option><option>SE</option><option>TO</option>
+        </select>
+      </div>
+    </div>
+
+    <h3>CIENCIA DO INTERESSADO</h3>
+    <label>QUEM VAI ASSINAR</label>
+    <select id="signTipo" onchange="onSign()">
+      <option value="PROPRIO">PROPRIO INTERESSADO (PADRAO)</option>
+      <option value="REPRESENTANTE LEGAL">REPRESENTANTE LEGAL</option>
+      <option value="PROCURADOR">PROCURADOR</option>
+      <option value="MOTORISTA">MOTORISTA</option>
+      <option value="TRANSPORTADOR">TRANSPORTADOR</option>
+      <option value="OUTRO">OUTRO</option>
+    </select>
+    <div id="divSign" class="extra">
+      <label>NOME *</label><input type="text" id="signNome">
+      <div class="fr">
+        <div><label>CPF</label><input type="text" id="signCpf" style="text-transform:none"></div>
+        <div><label>FUNCAO</label><input type="text" id="signFuncao"></div>
+      </div>
+    </div>
+
+    <h3>VEICULO / ESTABELECIMENTO</h3>
+    <div class="fr">
+      <div><label>TIPO *</label><input type="text" id="veicTipo" class="req"></div>
+      <div><label>PLACA *</label><input type="text" id="veicPlaca" class="req"></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:8px">
+        <button type="button" class="btnR" onclick="reuVeic()">🔄</button>
+      </div>
+    </div>
+
+    <h3>MERCADORIA</h3>
+    <label>DESCRICAO SUMARIA *</label><textarea id="mercDesc" rows="3" class="req"></textarea>
+    <div class="fr">
+      <div style="flex:1"><label>QTD VOLUMES *</label><input type="number" id="mercQtd" min="1" class="req" style="text-transform:none"></div>
+      <div style="flex:2"><label>LACRES / SELOS *</label><textarea id="mercLacres" rows="2" class="req"></textarea></div>
+    </div>
+    <label>OBSERVACOES</label>
+    <div style="display:flex;gap:6px">
+      <textarea id="mercObs" rows="2" style="flex:1;margin:0"></textarea>
+      <button type="button" class="btnR" style="align-self:flex-start;margin-top:0" onclick="reu('mercObs')">🔄</button>
+    </div>
+
+    <h3>SERVIDOR</h3>
+    <div class="fr">
+      <div style="flex:2"><label>NOME</label><input type="text" id="sNome" readonly></div>
+      <div><label>CARGO</label><input type="text" id="sCargo" readonly></div>
+      <div style="flex:0 0 100px"><label>MATRICULA</label><input type="text" id="sMat" readonly></div>
+    </div>
+    <div class="toggle">
+      <input type="checkbox" id="chkAlt" onchange="onAlt()">
+      <label for="chkAlt">OUTRO SERVIDOR VAI ASSINAR</label>
+    </div>
+    <div id="divAlt" class="extra">
+      <div class="fr">
+        <div style="flex:0 0 110px"><label>MATRICULA</label><input type="text" id="assinaMat" onblur="buscaAlt()"></div>
+        <div style="flex:2"><label>NOME *</label><input type="text" id="assinaNome"></div>
+        <div><label>CARGO *</label><input type="text" id="assinaCargo"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" id="btnEnviar">&#128228; ENVIAR</button>
+      <button type="button" id="btnNovo" onclick="novo()">+ NOVO</button>
+    </div>
+  </form>
+  </div>
+</div>
+
+<div id="sb"></div>
+<script>
+// CONFIG — preenchido automaticamente quando servido pelo bot
+// (http://localhost:5001/formulario ou http://IP:5001/formulario)
+let BOT_TOKEN   = '8059048645:AAEc_-LjsVJxiu41oJxG57XhQFj7Vq83Ymk';
+let BOT_CHAT_ID = '';
+let configCarregado = true;
+const SERVIDORES_AUTORIZADOS = {"2195272": {"nome": "ALEXANDRO MULLER", "cargo": "ADM", "ativo": 1, "cpf_hash": "1bc5ef00a2b00088772234bce468b754c3df63c7e1b9c2a8fd95fb5030af4424", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02456573": {"nome": "CAIO LUCAS MOREIRA", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "19d5715f18f2d20094c217722f727ec79bf9475b6cc6913d2473fee1569f2be4", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02409235": {"nome": "CAMILA MARIA DA SILVA", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "fc155c9fd3f87cc2b9c37d2416d884efd1f025d83061ea83ac869718212ebbf7", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "1303076": {"nome": "CAROLINA CHRISTINE MORIMOTO DA SILVA", "cargo": "AFRFB", "ativo": 1, "cpf_hash": "190bae1a2ef5e23000edb9936a0bbcd01a63e10c9a9dfb2b3d9c9ffc166da3d3", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02456571": {"nome": "DOUGLAS HONORIO SILVA DA SILVA", "cargo": "AFRFB", "ativo": 1, "cpf_hash": "deb643a84506ed0c70ed4264cc4314d09db7be322c96f8a395167b654604c150", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "57456": {"nome": "EDENILSON APARECIDO NUNES", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "51e499436e262552c057d72e7eb655a08ca0bda3e698d722e7be3735e0d4f72a", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": 1215361015}, "02458710": {"nome": "FERNANDO SEBASTIAO CASTRO ROSA", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "85b5d391a504f28620a1269b353328471ca22b1504304ad1ee05a8097afc47d3", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "1295691": {"nome": "FLAVIO BERNARDINO DE CARVALHO", "cargo": "AFRFB", "ativo": 1, "cpf_hash": "c126abec413f21eb2822921d64c41ae7328df7b61727e37eec63ef582c7930b3", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "1213909": {"nome": "JOAO ERNESTO ROSO PEDEBOS", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "e983b6fcbf38c2bdb91484427dbd1c2c68201b53a456fa2242b20cbbab416bbd", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "658": {"nome": "JOSIANE DA SILVA", "cargo": "ADM", "ativo": 1, "cpf_hash": "c8ab643b2f21b86ddf9efffdda21a14bcf7535e5e7666cfb556af0a0edd4be81", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02456782": {"nome": "MARCELO AMARAL COSTA", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "e9c75588d2893b428b7639db161eaa7ba9c715bc00c052df4c09b8c696fa53d1", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02456887": {"nome": "MARCELO RAFAEL FELIX", "cargo": "AFRFB", "ativo": 1, "cpf_hash": "981b8e2d0b446a2d519d5ae4da64bbbf1e41fb241b18bcf19d20143926800149", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02456807": {"nome": "MARLON DEL CANALE", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "05077d288c2dd32d6417903ec799308aaaed3ef808803378cd369fc64c35e2bf", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "01496052": {"nome": "MAURO DA SILVA CHIRICO JUNIOR", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "4224825a64e7be02a8f1c9f3c742e6b936df4bd83a195701f71270da142c5704", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "64642": {"nome": "NERI ANTONIO PARCIANELLO", "cargo": "ADM", "ativo": 1, "cpf_hash": "4cab9243fd91c650ec1ed360f4c3fe290fb661c1846d5c9247f97266530f7f32", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "57677": {"nome": "PAULO MARQUES FERNANDES", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "ad7ca154645e30ee61b73a12495375208659bcdd8c39f3e0d01971916f29727d", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02456780": {"nome": "RENATO BARBOSA DA SILVA", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "103bf87cadd941087c2a3e73271eae35580be9524f8939671d866cf2b09484e7", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}, "02457050": {"nome": "RONEI COSTA SILVA", "cargo": "ATRFB", "ativo": 1, "cpf_hash": "edb0f0ccdf4b78fd54c1451f62c07b1a52bd7421ef7b38ee0569a2f14d05999c", "senha_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "senha_trocada": 0, "chat_id": null}};
+const GRUPO_CHAT_ID = '-1002534909328';
+const BOT_CHAT_ID_RECEBIMENTO = '1215361015'; // substituido pelo gerar_html quando personalizado
+
+// Auto-login no celular quando o HTML já tem SERV_FIXO embutido
+window.addEventListener('DOMContentLoaded', function(){
+  if(typeof SERV_FIXO !== 'undefined' && SERV_FIXO?.mat){
+    // Preenche a matrícula e já loga direto
+    sv('lMat', SERV_FIXO.mat);
+    BOT_CHAT_ID = String(SERV_FIXO.chat_id || '');
+    ss(ge('statusLogin'), 'sl-ok', SERV_FIXO.nome + ' — ' + SERV_FIXO.cargo);
+    _logar(SERV_FIXO.mat, SERV_FIXO.nome, SERV_FIXO.cargo, false);
+  }
+});
+
+const API = location.origin.includes('localhost') || location.origin.includes('127.0.0.1') || location.origin.includes('5001')
+  ? '' // mesmo servidor — usa caminhos relativos
+  : 'http://localhost:5001'; // fallback arquivo local
+
+let S = {mat:'',nome:'',cargo:'',chat_id:''};
+let M = {local:'',vt:'',vp:'',obs:''};
+
+function gv(id){return (document.getElementById(id)?.value||'').trim()}
+function sv(id,v){const e=document.getElementById(id);if(e)e.value=v||''}
+function ge(id){return document.getElementById(id)}
+function up(s){return(s||'').toString().toUpperCase()}
+function st(m,t){const e=ge('sb');e.textContent=m;e.className=t;e.style.display='block';if(t!=='enc')setTimeout(()=>e.style.display='none',5000)}
+function ss(el,cls,m){el.className=cls;el.textContent=m;el.style.display='block'}
+
+function mascCpf(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>3) v=v.slice(0,3)+'.'+v.slice(3);
+  if(v.length>7) v=v.slice(0,7)+'.'+v.slice(7);
+  if(v.length>11) v=v.slice(0,11)+'-'+v.slice(11);
+  el.value=v.slice(0,14);
+}
+
+function mascData(el){let v=el.value.replace(/\D/g,'');if(v.length>2)v=v.slice(0,2)+'/'+v.slice(2);if(v.length>5)v=v.slice(0,5)+'/'+v.slice(5);el.value=v.slice(0,10)}
+function mascHora(el){let v=el.value.replace(/\D/g,'');if(v.length>2)v=v.slice(0,2)+':'+v.slice(2);el.value=v.slice(0,5)}
+
+// SHA256 puro em JS síncrono — funciona em qualquer browser sem crypto.subtle
+function sha256(str){
+  function rr(v,a){return(v>>>a)|(v<<(32-a));}
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var msg=[];
+  for(var i=0;i<str.length;i++){
+    var c=str.charCodeAt(i);
+    if(c<128) msg.push(c);
+    else if(c<2048){msg.push((c>>6)|192);msg.push((c&63)|128);}
+    else{msg.push((c>>12)|224);msg.push(((c>>6)&63)|128);msg.push((c&63)|128);}
+  }
+  var bitLen=msg.length*8;
+  msg.push(0x80);
+  while(msg.length%64!==56) msg.push(0);
+  for(var i=0;i<4;i++) msg.push(0);
+  msg.push((bitLen>>>24)&0xff);msg.push((bitLen>>>16)&0xff);
+  msg.push((bitLen>>>8)&0xff);msg.push(bitLen&0xff);
+  for(var b=0;b<msg.length;b+=64){
+    var w=[];
+    for(var j=0;j<16;j++) w[j]=(msg[b+j*4]<<24)|(msg[b+j*4+1]<<16)|(msg[b+j*4+2]<<8)|msg[b+j*4+3];
+    for(var j=16;j<64;j++){
+      var s0=rr(w[j-15],7)^rr(w[j-15],18)^(w[j-15]>>>3);
+      var s1=rr(w[j-2],17)^rr(w[j-2],19)^(w[j-2]>>>10);
+      w[j]=(w[j-16]+s0+w[j-7]+s1)|0;
+    }
+    var a=H[0],bb=H[1],cc=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(var j=0;j<64;j++){
+      var S1=rr(e,6)^rr(e,11)^rr(e,25);
+      var ch=(e&f)^(~e&g);
+      var t1=(h+S1+ch+K[j]+w[j])|0;
+      var S0=rr(a,2)^rr(a,13)^rr(a,22);
+      var maj=(a&bb)^(a&cc)^(bb&cc);
+      var t2=(S0+maj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+bb)|0;H[2]=(H[2]+cc)|0;H[3]=(H[3]+d)|0;
+    H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(function(x){return('00000000'+((x>>>0).toString(16))).slice(-8);}).join('');
+}
+
+// Chat ID do dispositivo atual — vem do gerar_html_onedrive injetado no HTML
+let BOT_CHAT_ID_PROPRIO = (typeof BOT_CHAT_ID_RECEBIMENTO !== 'undefined')
+  ? BOT_CHAT_ID_RECEBIMENTO : null;
+async function entrar(){
+  const cpf   = gv('lCpf').replace(/\D/g,'');
+  const senha = gv('lSenha');
+  if(!cpf || cpf.length < 11){
+    ge('loginErro').textContent='INFORME O CPF COMPLETO.';
+    ge('loginErro').style.display='block'; return;
+  }
+  ge('loginErro').style.display='none';
+  const btn=ge('btnEntrar');
+  btn.disabled=true; btn.textContent='VERIFICANDO...';
+
+  // CASO 1: HTML com SERVIDORES_AUTORIZADOS embutidos (Netlify/offline)
+  if(typeof SERVIDORES_AUTORIZADOS !== 'undefined'){
+    const cpfHash   = sha256(cpf);
+    const senhaHash = sha256(senha);
+
+    const entry = Object.entries(SERVIDORES_AUTORIZADOS).find(([mat,s]) =>
+      s.cpf_hash && s.cpf_hash === cpfHash
+    );
+    if(!entry){
+      ss(ge('statusLogin'),'sl-err','CPF NAO AUTORIZADO. CONTATE O ADMINISTRADOR.');
+      btn.disabled=false; btn.textContent='ENTRAR'; return;
+    }
+    const [matricula, s] = entry;
+
+    // Valida senha
+    if(!s.senha_hash || s.senha_hash !== senhaHash){
+      ss(ge('statusLogin'),'sl-err','SENHA INCORRETA.');
+      btn.disabled=false; btn.textContent='ENTRAR'; return;
+    }
+
+    // Usa chat_id individual do servidor para envio
+    BOT_CHAT_ID = String(s.chat_id || '');
+    ss(ge('statusLogin'),'sl-ok',`${s.nome} — ${s.cargo}`);
+    _logar(matricula, s.nome, s.cargo, !s.senha_trocada);
+    return;
+  }
+
+  // CASO 2: PC (localhost) — valida via API local
+  try{
+    const senhaHash = sha256(senha);
+    const r = await Promise.race([
+      fetch('/autenticar',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({cpf, senha_hash: senhaHash})
+      }),
+      new Promise((_,rej)=>setTimeout(()=>rej('timeout'),5000))
+    ]);
+    const j = await r.json();
+    if(!j.ok){
+      ss(ge('statusLogin'),'sl-err', j.erro || 'ACESSO NEGADO.');
+      btn.disabled=false; btn.textContent='ENTRAR'; return;
+    }
+    BOT_CHAT_ID = String(j.grupo_chat_id || j.chat_id || '');
+    ss(ge('statusLogin'),'sl-ok',`${j.nome} — ${j.cargo}`);
+    try{
+      const r2=await fetch(`/ultimo/${encodeURIComponent(j.matricula)}`);
+      const j2=await r2.json();
+      if(j2.ok){M.local=j2.local||'';M.vt=j2.veiculo_tipo||'';M.vp=j2.veiculo_placa||'';M.obs=j2.observacoes||'';}
+    }catch(e_){}
+    _logar(j.matricula, j.nome, j.cargo, !j.senha_trocada);
+  }catch(e){
+    ss(ge('statusLogin'),'sl-err','SEM CONEXAO COM O SISTEMA. CONTATE O ADMINISTRADOR.');
+    btn.disabled=false; btn.textContent='ENTRAR';
+  }
+}
+
+let _servidorAtual = null; // guarda dados do servidor logado para trocar senha
+
+function _logar(mat, nome, cargo, precisaTrocar){
+  S={mat:up(mat), nome:up(nome), cargo:up(cargo)};
+  sv('sNome',S.nome); sv('sCargo',S.cargo); sv('sMat',S.mat);
+  ge('siNome').textContent=S.nome;
+  ge('siSub').textContent=`${S.cargo} · MAT. ${S.mat}`;
+  const ag=new Date();
+  const d=ag.getDate().toString().padStart(2,'0');
+  const m=(ag.getMonth()+1).toString().padStart(2,'0');
+  sv('data',`${d}/${m}/${ag.getFullYear()}`);
+  sv('hora',ag.getHours().toString().padStart(2,'0')+':'+ag.getMinutes().toString().padStart(2,'0'));
+  ge('tLogin').style.display='none';
+  ge('btnEntrar').disabled=false; ge('btnEntrar').textContent='ENTRAR';
+
+  if(precisaTrocar){
+    // Primeiro acesso — obriga trocar senha
+    ge('tTrocaSenha').style.display='block';
+    ge('tForm').style.display='none';
+    ge('novaSenha').focus();
+  } else {
+    ge('tTrocaSenha').style.display='none';
+    ge('tForm').style.display='block';
+    window.scrollTo(0,0);
+  }
+}
+
+async function trocarSenha(){
+  const nova     = gv('novaSenha');
+  const confirma = gv('confirmarSenha');
+  const erro     = ge('trocaErro');
+  const btnTroca = ge('btnTrocaSenha');
+  erro.style.display='none';
+
+  if(!/^\d{6}$/.test(nova)){
+    erro.textContent='A senha deve ter exatamente 6 digitos numericos.';
+    erro.style.display='block'; return;
+  }
+  if(nova !== confirma){
+    erro.textContent='As senhas nao conferem.';
+    erro.style.display='block'; return;
+  }
+
+  if(btnTroca){ btnTroca.disabled=true; btnTroca.textContent='SALVANDO...'; }
+
+  const novaHash = sha256(nova);
+  let ok = false;
+
+  const modoLocal2 = location.protocol==='http:' &&
+    (location.hostname==='localhost' || location.hostname==='127.0.0.1');
+
+  if(modoLocal2){
+    try{
+      const r = await fetch('/trocar_senha',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({matricula: S.mat, nova_senha_hash: novaHash})
+      });
+      const j = await r.json();
+      ok = j.ok;
+    }catch(e_){}
+  } else {
+    const grupoDest = (typeof GRUPO_CHAT_ID !== 'undefined') ? GRUPO_CHAT_ID : BOT_CHAT_ID;
+    try{
+      const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          chat_id: Number(BOT_CHAT_ID || GRUPO_CHAT_ID),
+          text: `#TROCAR_SENHA
+SERV_MATRICULA: ${S.mat}
+NOVA_SENHA_HASH: ${novaHash}`
+        })
+      });
+      const j = await r.json();
+      ok = j.ok;
+    }catch(e_){}
+  }
+
+  if(btnTroca){ btnTroca.disabled=false; btnTroca.textContent='SALVAR NOVA SENHA'; }
+
+  if(ok){
+    erro.style.color='#27ae60'; erro.textContent='Senha alterada com sucesso!';
+    erro.style.display='block';
+    setTimeout(()=>{
+      ge('tTrocaSenha').style.display='none';
+      ge('tForm').style.display='block';
+      window.scrollTo(0,0);
+    }, 1500);
+  } else {
+    erro.style.color='#c0392b'; erro.textContent='Erro ao salvar senha. Tente novamente.';
+    erro.style.display='block';
+  }
+}
+
+function sair(){
+  S={mat:'',nome:'',cargo:'',chat_id:''};
+  ge('tForm').style.display='none';
+  ge('tTrocaSenha').style.display='none';
+  ge('tLogin').style.display='block';
+  if(ge('lCpf')) ge('lCpf').value='';
+  if(ge('lSenha')) ge('lSenha').value='';
+  ge('statusLogin').style.display='none';
+  ge('btnEntrar').disabled=false; ge('btnEntrar').textContent='ENTRAR';
+}
+
+// TOGGLES
+function onSign(){ge('divSign').classList.toggle('vis',gv('signTipo')!=='PROPRIO')}
+function onAlt(){ge('divAlt').classList.toggle('vis',ge('chkAlt').checked)}
+
+async function buscaAlt(){
+  const mat=up(gv('assinaMat')); if(!mat) return;
+  try{
+    const r=await Promise.race([fetch(`${API}/servidor/${encodeURIComponent(mat)}`),
+      new Promise((_,rej)=>setTimeout(()=>rej('t'),3000))]);
+    const j=await r.json();
+    if(j.encontrado&&j.ativo){sv('assinaNome',j.nome);sv('assinaCargo',j.cargo);}
+  }catch(e){}
+}
+
+// BOTOES ULTIMO
+function reu(id){const v=id==='local'?M.local:M.obs;if(v)sv(id,v);else st('SEM VALOR ANTERIOR.','err')}
+function reuVeic(){if(M.vt)sv('veicTipo',M.vt);if(M.vp)sv('veicPlaca',M.vp)}
+
+// VALIDACAO
+function validar(){
+  const ids=['local','data','hora','intNome','veicTipo','veicPlaca','mercDesc','mercQtd','mercLacres'];
+  let ok=true;
+  ids.forEach(id=>{const el=ge(id);if(!el?.value?.trim()){el.style.border='2px solid #e74c3c';if(ok){el.scrollIntoView({behavior:'smooth',block:'center'});ok=false;}}else el.style.border=''});
+  if(gv('signTipo')!=='PROPRIO'&&!gv('signNome').trim()){const el=ge('signNome');el.style.border='2px solid #e74c3c';if(ok){el.scrollIntoView({behavior:'smooth',block:'center'});ok=false;}}
+  return ok;
+}
+
+// ENVIO
+async function enviar(e){
+  e.preventDefault();
+  if(!validar()){st('PREENCHA OS CAMPOS OBRIGATORIOS.','err');return}
+
+  const btn=ge('btnEnviar');
+  btn.disabled=true; btn.textContent='ENVIANDO...';
+  st('ENVIANDO...','enc');
+
+  const dados={
+    SERV_MATRICULA:S.mat, LOCAL:up(gv('local')), DATA:gv('data'), HORA:gv('hora'),
+    NOME:up(gv('intNome')), CPF:gv('intDoc'), MAE:up(gv('intMae')),
+    NASCIMENTO:gv('intNasc'), ENDERECO:up(gv('intEnd')), NUMERO:up(gv('intNum')),
+    CEP:gv('intCep'), BAIRRO:up(gv('intBairro')), MUNICIPIO:up(gv('intMun')), UF:up(gv('intUf')),
+    SIGN_TIPO:up(gv('signTipo')), SIGN_NOME:up(gv('signNome')),
+    SIGN_CPF:gv('signCpf'), SIGN_FUNCAO:up(gv('signFuncao')),
+    VEICULO_TIPO:up(gv('veicTipo')), VEICULO_PLACA:up(gv('veicPlaca')),
+    DESCRICAO:up(gv('mercDesc')), QUANTIDADE:gv('mercQtd'),
+    LACRES:up(gv('mercLacres')), OBSERVACOES:up(gv('mercObs')),
+    ASSINA_NOME:ge('chkAlt').checked?up(gv('assinaNome')):'',
+    ASSINA_CARGO:ge('chkAlt').checked?up(gv('assinaCargo')):'',
+    ASSINA_MATRICULA:ge('chkAlt').checked?up(gv('assinaMat')):'',
+  };
+
+  // Monta texto #TLAVO para enviar pelo Telegram
+  const linhas = ['#TLAVO'];
+  Object.entries(dados).forEach(([k,v])=>{
+    if(v && String(v).trim()) linhas.push(`${k}: ${v}`);
+  });
+  const texto = linhas.join('
+');
+
+  // Modo PC — API local direta
+  const modoLocal = location.protocol==='http:' &&
+    (location.hostname==='localhost' || location.hostname==='127.0.0.1');
+
+  if(modoLocal){
+    try{
+      const r = await fetch('/enviar_formulario',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({chat_id:Number(BOT_CHAT_ID), dados})
+      });
+      const res = await r.json();
+      if(res.ok){
+        M.local=dados.LOCAL; M.vt=dados.VEICULO_TIPO; M.vp=dados.VEICULO_PLACA; M.obs=dados.OBSERVACOES;
+        st(`✅ ${res.numero} REGISTRADO! PDF SENDO GERADO...`,'ok');
+        setTimeout(()=>novo(), 2500);
+      } else {
+        st(`ERRO: ${res.erro}`,'err');
+      }
+    }catch(err){
+      st(`FALHA: ${err.message}`,'err');
+    }
+    btn.disabled=false; btn.textContent='ENVIAR';
+    return;
+  }
+
+  // Modo Netlify — envia para o GRUPO via API Telegram
+  // BOT_CHAT_ID foi definido no login como o chat_id do grupo
+  if(!BOT_TOKEN || !BOT_CHAT_ID){
+    st('ERRO: FORMULARIO NAO CONFIGURADO. Gere um novo HTML.','err');
+    btn.disabled=false; btn.textContent='ENVIAR'; return;
+  }
+
+  try{
+    const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: Number(BOT_CHAT_ID || GRUPO_CHAT_ID), text: texto})
+    });
+    const res = await r.json();
+    if(res.ok){
+      M.local=dados.LOCAL; M.vt=dados.VEICULO_TIPO; M.vp=dados.VEICULO_PLACA; M.obs=dados.OBSERVACOES;
+      st('✅ ENVIADO! AGUARDE O PDF NO GRUPO.','ok');
+      setTimeout(()=>novo(), 2500);
+    } else {
+      st(`ERRO TELEGRAM: ${res.description}`,'err');
+    }
+  }catch(err){
+    st(`FALHA NO ENVIO: ${err.message}`,'err');
+  }
+
+  btn.disabled=false; btn.textContent='ENVIAR';
+}
+
+function novo(){
+  ge('fForm').reset();
+  sv('sNome',S.nome);sv('sCargo',S.cargo);sv('sMat',S.mat);
+  const ag=new Date();
+  const d=ag.getDate().toString().padStart(2,'0');
+  const m=(ag.getMonth()+1).toString().padStart(2,'0');
+  sv('data',`${d}/${m}/${ag.getFullYear()}`);
+  sv('hora',ag.getHours().toString().padStart(2,'0')+':'+ag.getMinutes().toString().padStart(2,'0'));
+  ge('divSign').classList.remove('vis');
+  ge('divAlt').classList.remove('vis');
+  ge('chkAlt').checked=false;
+  window.scrollTo(0,0);
+}
+</script>
+</div>
+</body>
+</html>

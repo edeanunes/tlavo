@@ -529,8 +529,7 @@ async function enviar(e){
   Object.entries(dados).forEach(([k,v])=>{
     if(v && String(v).trim()) linhas.push(`${k}: ${v}`);
   });
-  const texto = linhas.join('
-');
+  const texto = linhas.join('\n');
 
   // Modo PC — API local direta
   const modoLocal = location.protocol==='http:' &&

@@ -333,8 +333,8 @@ async function entrar(){
       btn.disabled=false; btn.textContent='ENTRAR'; return;
     }
 
-    // Sempre usa o grupo para envio — bot lê mensagens do grupo
-    BOT_CHAT_ID = String(typeof GRUPO_CHAT_ID !== 'undefined' ? GRUPO_CHAT_ID : '');
+    // Usa chat privado do gestor — bot recebe e processa
+    BOT_CHAT_ID = String(typeof BOT_CHAT_ID_RECEBIMENTO !== 'undefined' ? BOT_CHAT_ID_RECEBIMENTO : '');
     ss(ge('statusLogin'),'sl-ok',`${s.nome} — ${s.cargo}`);
     _logar(matricula, s.nome, s.cargo, !s.senha_trocada);
     return;
